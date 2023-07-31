@@ -6,16 +6,7 @@ import com.databeans.Utils._
 object AddressHistoryBuilder {
   def addressHistoryBuilder (history: DataFrame, update: DataFrame): DataFrame = {
 
-    if (!compareIds(history, update))
-    {
-      val newUpdate = update
-        .withColumn("update_moved_out", lit(null))
-        .withColumn("update_moved_out",col("update_moved_out").cast("Date"))
-        .withColumn("update_current", lit(true))
-      val res = history.union(newUpdate)
-      res
-    }
-    else if (compareIds(history, update) && !compareAddress(history, update))
+    if (compareIds(history, update) && !compareAddress(history, update))
     {
       if (compareDates(history, update, "moved_in", "update_moved_in").contains(false))
       {
@@ -103,8 +94,12 @@ object AddressHistoryBuilder {
     }
     else
     {
-      println("new case")
-      history
+      val newUpdate = update
+        .withColumn("update_moved_out", lit(null))
+        .withColumn("update_moved_out",col("update_moved_out").cast("Date"))
+        .withColumn("update_current", lit(true))
+      val res = history.union(newUpdate)
+      res
     }
   }
 }

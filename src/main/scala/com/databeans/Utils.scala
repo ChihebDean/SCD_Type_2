@@ -9,9 +9,8 @@ object Utils {
 
     val joinCondition = history("id") === update("update_id")
     val joinedDF = history.join(update, joinCondition, "inner")
-    val existsInBothDFs = joinedDF.count() > 0
 
-    if (existsInBothDFs)
+    if (joinedDF.count() > 0)
     {
       true
     }
@@ -25,7 +24,7 @@ object Utils {
     val joinCondition = history("id") === update("update_id")
     val joinedDF = history.join(update, joinCondition, "inner")
     val resultDf = joinedDF.withColumn("comparison_result", expr("update_address == address"))
-    val allEqual = resultDf.agg(expr("count(case when comparison_result = true then 1 end) = count(*)")).collect()(0)(0)
+    val allEqual = resultDf.agg(expr("count(case when comparison_result = true then 1 end) = count(*)")).collect()(0)(0) //******
     if (allEqual == true)
     {
       println("same address")
@@ -39,11 +38,12 @@ object Utils {
   }
   def compareDates(history: DataFrame, update: DataFrame, historyDateColName: String, updateDateColName: String): Option[Boolean] ={
 
+
     val joinCondition = history("id") === update("update_id")
     val joinedDF = history.join(update, joinCondition, "inner")
 
     val historyMoveIn = joinedDF.select(col(historyDateColName)).first.getDate(0)
-    val updateMovedIn = joinedDF.select(col(updateDateColName)).first.getDate(0)
+    val updateMovedIn = joinedDF.select(col(updateDateColName)).first.getDate(0) //filter
 
     if (historyMoveIn.compareTo(updateMovedIn) > 0 )
     {
