@@ -37,12 +37,11 @@ object Utils {
   }
   def compareDates(history: DataFrame, update: DataFrame, historyDateColName: String, updateDateColName: String): Option[Boolean] ={
 
-
     val joinCondition = history("id") === update("update_id")
     val joinedDF = history.join(update, joinCondition, "inner")
 
     val historyMoveIn = joinedDF.select(col(historyDateColName)).first.getDate(0)
-    val updateMovedIn = joinedDF.select(col(updateDateColName)).first.getDate(0) //filter
+    val updateMovedIn = joinedDF.select(col(updateDateColName)).first.getDate(0)
 
     if (historyMoveIn.compareTo(updateMovedIn) > 0 )
     {
