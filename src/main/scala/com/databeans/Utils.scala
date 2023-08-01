@@ -21,11 +21,10 @@ object Utils {
   }
   def compareAddress(history: DataFrame, update: DataFrame): Boolean = {
 
-    val joinCondition = history("id") === update("update_id")
+    val joinCondition = history("id") === update("update_id") && history("address") === update("update_address")
     val joinedDF = history.join(update, joinCondition, "inner")
-    val resultDf = joinedDF.withColumn("comparison_result", expr("update_address == address"))
-    val allEqual = resultDf.agg(expr("count(case when comparison_result = true then 1 end) = count(*)")).collect()(0)(0) //******
-    if (allEqual == true)
+
+    if (joinedDF.count() > 0)
     {
       println("same address")
       true
