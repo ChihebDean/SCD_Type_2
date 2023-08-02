@@ -40,15 +40,15 @@ class UtilsSpec extends AnyFlatSpec with Matchers with GivenWhenThen {
       (1, "Mohsen", "Abidi", "Sousse", date("1995-12-23"), date("2000-12-12"), false)
     ).toDF("id", "firstName", "lastName", "address", "moved_in", "moved_out", "current")
     val update = Seq(
-      (5, "Bilel", "Ben Amor", "Sousse", date("2022-10-10"))
+      (5, "Bilel", "Ben Amor", "Sousse", date("2015-12-10"))
     ).toDF("update_id", "update_firstName", "update_lastName", "update_address", "update_moved_in")
-    val historyDateColName = "moved_in"
-    val updateDateColName = "update_moved_in"
+    val exp1 = "moved_in > update_moved_in"
+    val exp2 = "moved_in == update_moved_in"
     When("compareDates is invoked")
-    val Result = compareDates(history, update, historyDateColName, updateDateColName)
+    val result = compareDates(history, update, exp1, exp2)
     Then("if it's a late arriving date the value false should be returned")
-    val expectedResult = false
-    Seq(expectedResult).toDF.collect() should contain theSameElementsAs(Seq(Result).toDF.collect())
+    val expectedResult = true
+    Seq(expectedResult).toDF.collect() should contain theSameElementsAs(Seq(result).toDF.collect())
   }
   "compareAddress"should "check if an existing person is having a new address" in {
     Given("The history and update DataFrames")

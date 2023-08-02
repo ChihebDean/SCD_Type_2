@@ -8,7 +8,7 @@ object AddressHistoryBuilder {
 
     if (compareIds(history, update) && !compareAddress(history, update))
     {
-      if (compareDates(history, update, "moved_in", "update_moved_in").contains(false))
+      if (compareDates(history, update, "moved_in > update_moved_in", "moved_in == update_moved_in").contains(false))
       {
         val newUpdate = update
           .withColumn("update_moved_out", lit(null))
@@ -26,7 +26,7 @@ object AddressHistoryBuilder {
         val res = newHistory.union(history).union(newUpdate).dropDuplicates("id", "address")
         res
       }
-      else if(compareDates(history, update, "moved_in", "update_moved_in").contains(true)
+      else if(compareDates(history, update, "moved_in > update_moved_in", "moved_in == update_moved_in").contains(true)
       && !checkIfColumnExists(update, "update_moved_out"))
       {
         val joinCondition = history.col("id") === update.col("update_id")
@@ -50,7 +50,7 @@ object AddressHistoryBuilder {
     }
     else if (compareIds(history, update) && compareAddress(history, update))
     {
-        if (compareDates(history, update, "moved_in", "update_moved_in").contains(true)
+        if (compareDates(history, update, "moved_in > update_moved_in", "moved_in == update_moved_in").contains(true)
         && !checkIfColumnExists(update, "update_moved_out"))
          {
            val joinCondition = history.col("id") === update.col("update_id")
@@ -65,12 +65,12 @@ object AddressHistoryBuilder {
            val res = newUpdate.union(history).dropDuplicates("id", "address")
            res
          }
-        else if (compareDates(history, update, "moved_in", "update_moved_in").contains(false))
+        else if (compareDates(history, update, "moved_in > update_moved_in", "moved_in == update_moved_in").contains(false))
           {
             history
           }
-        else if (compareDates(history, update, "moved_in", "update_moved_in").isEmpty
-        && compareDates(history, update, "moved_in", "update_moved_out").contains(false))
+        else if (compareDates(history, update, "moved_in > update_moved_in", "moved_in == update_moved_in").isEmpty
+        && compareDates(history, update, "moved_in > update_moved_out", "moved_in == update_moved_out").contains(false))
           {
             val joinCondition = history.col("id") === update.col("update_id")
             val newUpdate = update.join(history, joinCondition, "inner")

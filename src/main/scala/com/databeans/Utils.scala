@@ -1,7 +1,7 @@
 package com.databeans
-import java.util.Date
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import java.sql.Date
 
 object Utils {
 
@@ -35,25 +35,18 @@ object Utils {
       false
     }
   }
-  def compareDates(history: DataFrame, update: DataFrame, historyDateColName: String, updateDateColName: String): Option[Boolean] ={
+  def compareDates(history: DataFrame, update: DataFrame, exp1: String, exp2: String): Option[Boolean] ={
 
     val joinCondition = history("id") === update("update_id")
     val joinedDF = history.join(update, joinCondition, "inner")
+      .withColumn("is_early", expr(exp1))
+      .withColumn("is_equal", expr(exp2))
+    val rowsWhereColumnsNotEqual = joinedDF.filter(col("is_early") === true)
+    val rowsWhereColumnsEqual = joinedDF.filter(col("is_equal") === true)
 
-    val historyMoveIn = joinedDF.select(col(historyDateColName)).first.getDate(0)
-    val updateMovedIn = joinedDF.select(col(updateDateColName)).first.getDate(0)
-
-    if (historyMoveIn.compareTo(updateMovedIn) > 0 )
-    {
-      println("early arriving date")
-      Some(true)
-    }
-    else if (historyMoveIn.compareTo(updateMovedIn) == 0 ) { None }
-    else
-    {
-      println("late arriving date")
-      Some(false)
-    }
+    if (rowsWhereColumnsNotEqual.count() > 0 && rowsWhereColumnsEqual.count() <= 0) {Some(true)}
+    else if (rowsWhereColumnsNotEqual.count() <= 0 && rowsWhereColumnsEqual.count() > 0) {None}
+    else {Some(false)}
   }
   def checkIfColumnExists(update: DataFrame, colNameToCheck: String): Boolean ={
 
